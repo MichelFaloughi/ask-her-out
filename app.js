@@ -205,23 +205,37 @@ function setupAnswers() {
     const px = e && (e.clientX ?? e.touches?.[0]?.clientX);
     const py = e && (e.clientY ?? e.touches?.[0]?.clientY);
     if (px != null && py != null) {
-      // Cursor in arena-local coords, then push button away from it
       dx = cx - (px - arenaRect.left);
       dy = cy - (py - arenaRect.top);
-      const len = Math.hypot(dx, dy) || 1;
-      dx /= len; dy /= len;
     } else {
+      dx = 0; dy = 0;
+    }
+    let len = Math.hypot(dx, dy);
+    if (len < 1) {
+      // No useful direction (cursor near center, or focus event) — random
       const a = Math.random() * Math.PI * 2;
       dx = Math.cos(a); dy = Math.sin(a);
+    } else {
+      dx /= len; dy /= len;
     }
 
-    const step = STEP + Math.random() * STEP_JITTER;
+    // Make the step at least big enough that the button's new bounding box
+    // doesn't overlap the old one — i.e. the cursor that triggered this dodge
+    // can't still be over the button afterwards.
+    const w = no.offsetWidth, h = no.offsetHeight;
+    const BUFFER = 8;
+    const minStep = Math.min(
+      Math.abs(dx) > 0.01 ? w / Math.abs(dx) : Infinity,
+      Math.abs(dy) > 0.01 ? h / Math.abs(dy) : Infinity
+    ) + BUFFER;
+    const step = Math.max(STEP, minStep) + Math.random() * STEP_JITTER;
+
     const prevX = nx, prevY = ny;
     nx += dx * step;
     ny += dy * step;
     placeNo();
 
-    // If clamped against an edge with no movement, dodge perpendicular
+    // If clamping pinned it against an edge, dodge perpendicular instead
     if (Math.abs(nx - prevX) < 4 && Math.abs(ny - prevY) < 4) {
       nx = prevX + (-dy) * step;
       ny = prevY + ( dx) * step;
