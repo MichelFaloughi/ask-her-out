@@ -45,15 +45,20 @@ function applyTheme(t) {
 }
 
 // ---------- Mode switch ----------
-const hash = location.hash.slice(1);
-if (hash) {
-  try { renderViewer(decodeData(hash)); }
-  catch (e) {
-    console.warn('Bad invite hash:', e);
+if (typeof window.__INVITE__ !== 'undefined') {
+  try { renderViewer(window.__INVITE__); }
+  catch (e) { console.warn('Bad invite:', e); }
+} else {
+  const hash = location.hash.slice(1);
+  if (hash) {
+    try { renderViewer(decodeData(hash)); }
+    catch (e) {
+      console.warn('Bad invite hash:', e);
+      document.getElementById('creator').hidden = false;
+    }
+  } else {
     document.getElementById('creator').hidden = false;
   }
-} else {
-  document.getElementById('creator').hidden = false;
 }
 
 // =============================================================
@@ -92,6 +97,11 @@ function handleFile(file) {
       canvas.width = width; canvas.height = height;
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
       compressedImage = canvas.toDataURL('image/jpeg', 0.75);
+      if (compressedImage.length > 800_000) {
+        dropText.textContent = 'Image too large — please use a smaller one.';
+        compressedImage = null;
+        return;
+      }
       preview.src = compressedImage;
       preview.classList.add('show');
       dropText.textContent = file.name + '  ✓';
@@ -125,7 +135,7 @@ if (themePicker) {
 
 const creatorForm = document.getElementById('creator-form');
 if (creatorForm) {
-  creatorForm.addEventListener('submit', e => {
+  creatorForm.addEventListener('submit', async e => {
     e.preventDefault();
     const err = document.getElementById('creator-error');
     err.textContent = '';
@@ -139,13 +149,32 @@ if (creatorForm) {
 
     if (!name) { err.textContent = 'Please add her name.'; return; }
 
-    const data = { n: name, d: date, t: time, p: place, m: msg, i: compressedImage, th: currentTheme };
-    if (ask) data.a = ask;
-    const url = location.origin + location.pathname + '#' + encodeData(data);
+    const submitBtn = creatorForm.querySelector('button[type=submit]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating link…';
 
-    document.getElementById('link-result').textContent = url;
-    document.getElementById('link-output').hidden = false;
-    document.getElementById('link-output').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invite: { n: name, d: date, t: time, p: place, m: msg, th: currentTheme, ...(ask && { a: ask }) },
+          imageDataUrl: compressedImage || null,
+        }),
+      });
+      if (!res.ok) throw new Error('Server error ' + res.status);
+      const { id } = await res.json();
+      const url = location.origin + '/a/' + id;
+      document.getElementById('link-result').textContent = url;
+      const linkOutput = document.getElementById('link-output');
+      linkOutput.hidden = false;
+      try { linkOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch {}
+    } catch {
+      err.textContent = 'Something went wrong. Please try again.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Generate link 💌';
+    }
   });
 
   document.getElementById('copy-btn').addEventListener('click', async () => {
@@ -174,8 +203,10 @@ function renderViewer(data) {
   document.getElementById('viewer').hidden = false;
 
   const photo = document.getElementById('g-photo');
-  if (data.i) {
-    photo.src = data.i;
+  if (data.photoUrl) {
+    photo.src = data.photoUrl;  // served from /api/photo/:id
+  } else if (data.i) {
+    photo.src = data.i;         // legacy hash-based links with embedded base64
   } else {
     photo.hidden = true;
   }
