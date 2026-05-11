@@ -111,6 +111,38 @@ function handleFile(file) {
   reader.readAsDataURL(file);
 }
 
+// ---------- Places autocomplete ----------
+let selectedLat = null, selectedLng = null;
+let placeAcEl = null;
+
+window.initAutocomplete = async function() {
+  const originalInput = document.getElementById('place');
+  if (!originalInput) return;
+  const { PlaceAutocompleteElement } = await google.maps.importLibrary('places');
+  placeAcEl = new PlaceAutocompleteElement();
+  placeAcEl.style.cssText = 'width:100%; display:block;';
+  originalInput.parentNode.insertBefore(placeAcEl, originalInput);
+  originalInput.hidden = true;
+
+  placeAcEl.addEventListener('gmp-placeselect', async ({ place }) => {
+    await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
+    selectedLat = place.location.lat();
+    selectedLng = place.location.lng();
+    originalInput.value = place.displayName || place.formattedAddress || '';
+  });
+
+  placeAcEl.addEventListener('input', () => {
+    selectedLat = null; selectedLng = null;
+    originalInput.value = '';
+  });
+};
+
+// ---------- Dev prefill ----------
+if (document.getElementById('creator') && !document.getElementById('creator').hidden) {
+  document.getElementById('name').value = 'Ana';
+  document.getElementById('creator-email').value = 'michel1@seas.upenn.edu';
+}
+
 // ---------- Ask phrase counter ----------
 const askInput = document.getElementById('ask-phrase');
 const askCount = document.getElementById('ask-count');
@@ -144,7 +176,7 @@ if (creatorForm) {
     const email = document.getElementById('creator-email').value.trim();
     const date  = document.getElementById('date').value;
     const time  = document.getElementById('time').value;
-    const place = document.getElementById('place').value.trim();
+    const place = (placeAcEl ? (placeAcEl.value || document.getElementById('place').value) : document.getElementById('place').value).trim();
     const msg   = document.getElementById('message').value.trim();
     const ask   = document.getElementById('ask-phrase').value.trim();
 
@@ -159,7 +191,7 @@ if (creatorForm) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          invite: { n: name, d: date, t: time, p: place, m: msg, th: currentTheme, ...(ask && { a: ask }), ...(email && { email }) },
+          invite: { n: name, d: date, t: time, p: place, m: msg, th: currentTheme, ...(ask && { a: ask }), ...(email && { email }), ...(selectedLat != null && { plat: selectedLat, plng: selectedLng }) },
           imageDataUrl: compressedImage || null,
         }),
       });
@@ -199,6 +231,31 @@ if (creatorForm) {
 // =============================================================
 //  VIEWER
 // =============================================================
+
+// Splits text into emoji and non-emoji spans so the gradient applies only to
+// regular characters — emoji need a non-transparent color to render their colors.
+function renderAskText(el, text) {
+  const emojiRe = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+  el.innerHTML = '';
+  let last = 0, match;
+  while ((match = emojiRe.exec(text)) !== null) {
+    if (match.index > last) {
+      const s = document.createElement('span');
+      s.className = 'ask-gradient';
+      s.textContent = text.slice(last, match.index);
+      el.appendChild(s);
+    }
+    el.appendChild(document.createTextNode(match[0]));
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) {
+    const s = document.createElement('span');
+    s.className = 'ask-gradient';
+    s.textContent = text.slice(last);
+    el.appendChild(s);
+  }
+}
+
 function renderViewer(data) {
   applyTheme(data.th || 'default');
   document.getElementById('viewer').hidden = false;
@@ -212,7 +269,7 @@ function renderViewer(data) {
     photo.hidden = true;
   }
 
-  document.getElementById('g-ask').textContent = `${data.n}, ${data.a || DEFAULT_ASK}`;
+  renderAskText(document.getElementById('g-ask'), `${data.n}, ${data.a || DEFAULT_ASK}`);
   document.title = `For ${data.n} 💌`;
 
   const when = formatWhen(data.d, data.t);
@@ -246,7 +303,7 @@ function renderViewer(data) {
     m.textContent = '“' + data.m + '”';
     m.hidden = false;
   }
-  setupAnswers();
+  setupAnswers(data.plat, data.plng, data.p);
 }
 
 function formatWhen(d, t) {
@@ -267,7 +324,7 @@ function formatWhen(d, t) {
 //  We track its position in a local (px, px) variable instead of
 //  re-reading the DOM each event — no transition / reflow races.
 // -------------------------------------------------------------
-function setupAnswers() {
+function setupAnswers(plat, plng, placeName) {
   const arena = document.getElementById('answer-buttons');
   const yes = document.getElementById('btn-yes');
   const no  = document.getElementById('btn-no');
@@ -356,6 +413,21 @@ function setupAnswers() {
     document.getElementById('confirmation').classList.add('show');
     setTimeout(confettiBurst, 500);
     setTimeout(confettiBurst, 1100);
+
+    const mapQ = plat != null && plng != null
+      ? `${plat},${plng}`
+      : placeName ? encodeURIComponent(placeName) : null;
+    if (mapQ && window.__MAPS_KEY__) {
+      const mapContainer = document.getElementById('map-container');
+      if (mapContainer) {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.google.com/maps/embed/v1/place?key=${window.__MAPS_KEY__}&q=${mapQ}&zoom=15`;
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('loading', 'lazy');
+        mapContainer.appendChild(iframe);
+        mapContainer.hidden = false;
+      }
+    }
 
     // fire-and-forget notification — don't block the UI
     if (window.__INVITE__?.id) {

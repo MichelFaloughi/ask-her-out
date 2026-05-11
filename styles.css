@@ -101,6 +101,14 @@ h1 { font-size: 28px; margin: 0 0 6px; font-weight: 800; }
 h2 { font-size: 26px; margin: 8px 0 14px; }
 p  { line-height: 1.55; }
 
+.quote-tagline {
+  font-size: 12px;
+  font-style: italic;
+  color: #a89099;
+  margin: 2px 0 10px;
+  text-align: center;
+}
+
 /* ---------- Creator form ---------- */
 form { display: grid; gap: 14px; text-align: left; }
 
@@ -227,11 +235,14 @@ button {
   font-size: 30px;
   font-weight: 800;
   margin: 4px 0 22px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.ask-gradient {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  line-height: 1.2;
 }
 
 .details {
@@ -293,6 +304,19 @@ button {
 /* ---------- Confirmation ---------- */
 .confirmation { display: none; }
 .confirmation.show { display: block; animation: bounceIn 0.6s ease; }
+
+.map-container {
+  margin-top: 16px;
+  border-radius: 14px;
+  overflow: hidden;
+  height: 220px;
+  width: 100%;
+}
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 @keyframes bounceIn {
   0%   { transform: scale(0.3); opacity: 0; }
   50%  { transform: scale(1.1); }

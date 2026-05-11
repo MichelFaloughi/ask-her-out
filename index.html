@@ -11,7 +11,7 @@
 <!-- ============ CREATOR ============ -->
 <div id="creator" class="card" hidden>
   <h1>Make your invite ✨</h1>
-  <p style="margin-top:0; color:#7a6471;">Fill this in — you'll get a link to send her.</p>
+  <p style="margin-top:0; color:#7a6471;">You miss 💯% of the shots you don't take.</p>
 
   <form id="creator-form" novalidate>
     <div>
@@ -128,9 +128,19 @@
     <div class="check">💖</div>
     <h2>Yay! It's a date!</h2>
     <p id="conf-text"></p>
+    <div class="map-container" id="map-container" hidden></div>
   </div>
 </div>
 
-<script src="app.js?v=4"></script>
+<script>
+  window.__MAPS_KEY__ = 'AIzaSyCMpyHYUFTiu2US4WupRP0Z2ZKpOGPDFZE';
+  (function() {
+    var s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + window.__MAPS_KEY__ + '&libraries=places&loading=async&callback=initAutocomplete';
+    s.async = true; s.defer = true;
+    document.head.appendChild(s);
+  })();
+</script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

@@ -8,6 +8,8 @@ function escHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
+const MAPS_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
+
 module.exports = async (req, res) => {
   const { id } = req.query;
   const invite = await kv.get(id);
@@ -58,10 +60,11 @@ module.exports = async (req, res) => {
     <div class="check">💖</div>
     <h2>Yay! It's a date!</h2>
     <p id="conf-text"></p>
+    <div class="map-container" id="map-container" hidden></div>
   </div>
 </div>
-<script>window.__INVITE__ = ${safeJson};</script>
-<script src="/app.js?v=4"></script>
+<script>window.__INVITE__ = ${safeJson}; window.__MAPS_KEY__ = "${escHtml(MAPS_KEY)}";</script>
+<script src="/app.js?v=5"></script>
 </body>
 </html>`);
 };
