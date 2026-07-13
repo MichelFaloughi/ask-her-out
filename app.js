@@ -203,12 +203,6 @@ async function selectPlace(prediction, dropdown, input) {
 
 setupPlaceAutocomplete();
 
-// ---------- Dev prefill ----------
-if (document.getElementById('creator') && !document.getElementById('creator').hidden) {
-  document.getElementById('name').value = 'Ana';
-  document.getElementById('creator-email').value = 'michel1@seas.upenn.edu';
-}
-
 // ---------- Ask phrase counter ----------
 const askInput = document.getElementById('ask-phrase');
 const askCount = document.getElementById('ask-count');
