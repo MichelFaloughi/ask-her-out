@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Will you go out with me?</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <title>Wanna go on a date?</title>
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -63,7 +63,7 @@
             <span class="counter"><span id="ask-count">0</span>/80</span>
           </label>
           <input type="text" id="ask-phrase" maxlength="80"
-                 placeholder="will you go out with me?" autocomplete="off">
+                 placeholder="wanna go on a date?" autocomplete="off">
           <div class="hint" style="margin-top:4px;">Shown as: "{her name}, {ask phrase}"</div>
         </div>
 
@@ -90,8 +90,31 @@
               <span class="swatch-preview t-lavender"></span>
               <span>Lavender</span>
             </button>
+            <button type="button" class="theme-swatch premium" data-theme="petals" hidden>
+              <span class="swatch-preview t-petals"></span>
+              <span>Petals</span>
+              <span class="price-badge">✨ $2</span>
+            </button>
+            <button type="button" class="theme-swatch premium" data-theme="letter" hidden>
+              <span class="swatch-preview t-letter"></span>
+              <span>Love letter</span>
+              <span class="price-badge">✨ $2</span>
+            </button>
+            <button type="button" class="theme-swatch premium" data-theme="starry" hidden>
+              <span class="swatch-preview t-starry"></span>
+              <span>Starry night</span>
+              <span class="price-badge">✨ $2</span>
+            </button>
           </div>
         </div>
+
+        <label class="addon" id="stats-addon" hidden>
+          <input type="checkbox" id="stats-addon-check">
+          <span>
+            <strong>Reaction stats card</strong> <span class="price-badge">✨ $3</span>
+            <span class="hint" style="margin-top:2px;">After she says yes, she sees how long she hesitated and how many times she chased the "No" button, with a share button.</span>
+          </span>
+        </label>
       </div>
     </details>
 
@@ -106,6 +129,7 @@
     <div class="hint">
       Send this link — it'll show a preview card in iMessage and other apps.
     </div>
+    <div class="hint" id="payment-note" hidden></div>
   </div>
 </div>
 
@@ -129,10 +153,21 @@
     <h2>Yay! It's a date!</h2>
     <p id="conf-text"></p>
     <div class="map-container" id="map-container" hidden></div>
+    <div class="stats-card" id="stats-card" hidden>
+      <div class="stats-title">Reaction stats 📊</div>
+      <div class="stats-grid">
+        <div><div class="stat-num" id="stat-time"></div><div class="stat-label">to say yes</div></div>
+        <div><div class="stat-num" id="stat-chases"></div><div class="stat-label">"No" escapes</div></div>
+      </div>
+      <div class="stats-verdict" id="stat-verdict"></div>
+      <button type="button" class="copy-btn" id="stats-share">Share 📤</button>
+    </div>
+    <a class="btn-make-own" href="/">Make your own invite 💌</a>
   </div>
+  <a class="make-own" href="/">Make your own 💌</a>
 </div>
 
 <script>window.__MAPS_KEY__ = 'AIzaSyCMpyHYUFTiu2US4WupRP0Z2ZKpOGPDFZE';</script>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

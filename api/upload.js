@@ -18,6 +18,9 @@ module.exports = async (req, res) => {
 
   const id = nanoid(8);
   const stored = { ...invite };
+  // Entitlements and results are only ever written server-side
+  delete stored.premium;
+  delete stored.result;
   if (imageDataUrl) stored.photoData = imageDataUrl;
 
   await kv.set(id, stored, { ex: 60 * 60 * 24 * 365 });

@@ -2,3 +2,9 @@
 node_modules/
 .vercel
 .env*.local
+
+# Secrets that must never be committed
+stripe_backup_code*
+*backup_code*.txt
+*recovery_code*.txt
+.DS_Store

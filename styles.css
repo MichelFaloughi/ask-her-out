@@ -40,6 +40,32 @@
   --heart: rgba(142, 68, 173, 0.55);
 }
 
+/* ---------- Premium themes ---------- */
+[data-theme="petals"] {
+  --bg1: #fde2e4;
+  --bg2: #fff0f3;
+  --accent: #e5647c;
+  --accent2: #f9a8b8;
+  --ink: #4a2b35;
+  --heart: rgba(229, 100, 124, 0.7);
+}
+[data-theme="letter"] {
+  --bg1: #f3e7d3;
+  --bg2: #e8d5b5;
+  --accent: #a3223c;
+  --accent2: #d4a373;
+  --ink: #3b2222;
+  --heart: rgba(163, 34, 60, 0.45);
+}
+[data-theme="starry"] {
+  --bg1: #0f1a3a;
+  --bg2: #2b1e4f;
+  --accent: #e39b0b;
+  --accent2: #f78fb3;
+  --ink: #2b2140;
+  --heart: rgba(255, 224, 150, 0.9);
+}
+
 html, body {
   transition: background-color .35s ease, color .35s ease;
 }
@@ -80,6 +106,25 @@ body {
   75%  { transform: translate(calc(var(--drift, 0px) *  1), 25vh) rotate(270deg) scale(1.05); }
   92%  { opacity: 1; }
   100% { transform: translate(0, -15vh) rotate(360deg) scale(.9); opacity: 0; }
+}
+
+/* Petals fall downward and sway, unlike hearts which rise */
+.heart.petal { animation-name: fall; animation-timing-function: linear; }
+@keyframes fall {
+  0%   { transform: translate(0, -12vh) rotate(0deg);   opacity: 0; }
+  6%   { opacity: 1; }
+  25%  { transform: translate(calc(var(--drift, 0px) *  1), 20vh) rotate(60deg); }
+  50%  { transform: translate(calc(var(--drift, 0px) * -1), 50vh) rotate(160deg); }
+  75%  { transform: translate(calc(var(--drift, 0px) *  1), 80vh) rotate(250deg); }
+  94%  { opacity: 1; }
+  100% { transform: translate(0, 112vh) rotate(360deg); opacity: 0; }
+}
+
+/* Stars stay put and twinkle */
+.heart.star { animation-name: twinkle; animation-timing-function: ease-in-out; }
+@keyframes twinkle {
+  0%, 100% { opacity: .15; transform: scale(.8); }
+  50%      { opacity: 1;   transform: scale(1.2); }
 }
 
 /* ---------- Card ---------- */
@@ -363,6 +408,104 @@ button {
 }
 .check { font-size: 72px; margin-bottom: 8px; }
 
+/* ---------- "Make your own" viral links ---------- */
+.make-own {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 12px;
+  color: #a89099;
+  text-decoration: none;
+}
+.make-own:hover { color: var(--accent); text-decoration: underline; }
+.btn-make-own {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  background: white;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform .12s, background .15s;
+}
+.btn-make-own:hover { transform: translateY(-2px); background: rgba(255, 77, 109, 0.06); }
+.confirmation.show ~ .make-own { display: none; }
+
+/* ---------- Reaction stats card ---------- */
+.stats-card {
+  margin-top: 18px;
+  padding: 16px 18px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: bounceIn .6s ease;
+}
+.stats-title { font-weight: 800; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; opacity: .9; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 8px; }
+.stat-num { font-size: 34px; font-weight: 800; line-height: 1.1; }
+.stat-label { font-size: 12px; opacity: .85; }
+.stats-verdict { font-size: 14px; font-weight: 600; margin: 4px 0 12px; }
+.stats-card .copy-btn { background: white; border-color: white; color: var(--accent); margin-top: 0; }
+
+/* ---------- Love-letter envelope reveal ---------- */
+.card.sealed { opacity: 0; transform: scale(.9); pointer-events: none; }
+.card { transition: opacity .6s ease, transform .6s ease; }
+.envelope {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity .5s ease .6s;
+}
+.envelope.open { opacity: 0; pointer-events: none; }
+.env-back, .env-front, .env-flap {
+  position: absolute;
+  width: min(320px, 82vw);
+  height: 210px;
+  left: 50%;
+  top: 50%;
+  margin-left: calc(min(320px, 82vw) / -2);
+  margin-top: -105px;
+}
+.env-back { background: var(--accent2); border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+.env-front {
+  background: var(--accent);
+  border-radius: 10px;
+  clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+  z-index: 2;
+}
+.env-flap {
+  background: color-mix(in srgb, var(--accent) 80%, black);
+  clip-path: polygon(0 0, 50% 60%, 100% 0);
+  transform-origin: top center;
+  transition: transform .7s ease;
+  z-index: 3;
+}
+.envelope.open .env-flap { transform: rotateX(180deg); z-index: 1; }
+.env-seal {
+  position: absolute;
+  z-index: 4;
+  font-size: 40px;
+  transform: translateY(6px);
+  animation: pulse 2.6s ease-in-out infinite;
+}
+.envelope.open .env-seal { display: none; }
+.env-hint {
+  position: absolute;
+  top: calc(50% + 125px);
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 15px;
+  letter-spacing: .02em;
+}
+
 /* ---------- Confetti ---------- */
 .confetti {
   position: fixed;
@@ -439,3 +582,25 @@ details.advanced[open] summary::before { transform: rotate(90deg); }
 .swatch-preview.t-sunset   { background: linear-gradient(135deg, #ffafbd, #ffc3a0); }
 .swatch-preview.t-mint     { background: linear-gradient(135deg, #a8edea, #d4fc79); }
 .swatch-preview.t-lavender { background: linear-gradient(135deg, #d4b4f5, #fbc2eb); }
+.swatch-preview.t-petals   { background: linear-gradient(135deg, #fde2e4, #fff0f3); }
+.swatch-preview.t-letter   { background: linear-gradient(135deg, #f3e7d3, #a3223c); }
+.swatch-preview.t-starry   { background: linear-gradient(135deg, #0f1a3a, #2b1e4f); }
+
+.price-badge {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, white);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+.addon {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: #6b5664;
+  cursor: pointer;
+}
+.addon input { margin-top: 3px; accent-color: var(--accent); }
+.addon .hint { display: block; }

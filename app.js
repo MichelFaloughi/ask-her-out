@@ -2,23 +2,43 @@
 //  ask-out  —  client-side invite generator + viewer
 // =============================================================
 
-// ---------- Floating background hearts ----------
-(function spawnHearts() {
-  const symbols = ['💗', '💖', '💕', '✨', '🌸', '🌷'];
-  for (let i = 0; i < 26; i++) {
+// ---------- Floating background particles ----------
+// Each theme has a particle "kind": hearts (free themes), falling petals,
+// or twinkling stars. Respawned whenever the theme changes.
+const PARTICLES = {
+  hearts: { symbols: ['💗', '💖', '💕', '✨', '🌸', '🌷'], count: 26 },
+  petals: { symbols: ['🌸', '🌸', '🌸', '🌺', '💮'],      count: 34, cls: 'petal' },
+  stars:  { symbols: ['✦', '✧', '★', '✦', '·'],           count: 60, cls: 'star' },
+};
+let currentParticles = null;
+function spawnParticles(kind) {
+  if (kind === currentParticles) return;
+  currentParticles = kind;
+  document.querySelectorAll('.heart').forEach(el => el.remove());
+  const cfg = PARTICLES[kind] || PARTICLES.hearts;
+  for (let i = 0; i < cfg.count; i++) {
     const h = document.createElement('div');
-    h.className = 'heart';
-    h.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    h.className = 'heart' + (cfg.cls ? ' ' + cfg.cls : '');
+    h.textContent = cfg.symbols[Math.floor(Math.random() * cfg.symbols.length)];
     h.style.left = (Math.random() * 100) + 'vw';
-    h.style.fontSize = (18 + Math.random() * 28) + 'px';
-    h.style.animationDuration = (7 + Math.random() * 10) + 's';
-    // Negative delay so hearts start mid-animation — they're already
-    // floating when the page loads instead of waiting offscreen.
-    h.style.animationDelay = (-Math.random() * 14) + 's';
-    h.style.setProperty('--drift', (40 + Math.random() * 80) * (Math.random() < 0.5 ? -1 : 1) + 'px');
+    if (kind === 'stars') {
+      // Stars sit still and twinkle at random positions
+      h.style.top = (Math.random() * 100) + 'vh';
+      h.style.fontSize = (6 + Math.random() * 14) + 'px';
+      h.style.animationDuration = (1.5 + Math.random() * 3) + 's';
+      h.style.animationDelay = (-Math.random() * 4) + 's';
+    } else {
+      h.style.fontSize = (18 + Math.random() * 28) + 'px';
+      h.style.animationDuration = (7 + Math.random() * 10) + 's';
+      // Negative delay so particles start mid-animation — they're already
+      // floating when the page loads instead of waiting offscreen.
+      h.style.animationDelay = (-Math.random() * 14) + 's';
+      h.style.setProperty('--drift', (40 + Math.random() * 80) * (Math.random() < 0.5 ? -1 : 1) + 'px');
+    }
     document.body.appendChild(h);
   }
-})();
+}
+spawnParticles('hearts');
 
 // ---------- UTF-8 safe base64 helpers ----------
 function encodeData(obj) {
@@ -33,16 +53,31 @@ function decodeData(str) {
 }
 
 // ---------- Constants ----------
-const DEFAULT_ASK = 'will you go out with me?';
+const DEFAULT_ASK = 'wanna go on a date?';
 
 // ---------- Themes ----------
-const THEMES = ['default', 'ocean', 'sunset', 'mint', 'lavender'];
+// Premium themes are only honored on server-rendered invites where the
+// server has confirmed payment (see api/a/[id].js); the client just renders.
+const THEMES = {
+  default:  { particles: 'hearts' },
+  ocean:    { particles: 'hearts' },
+  sunset:   { particles: 'hearts' },
+  mint:     { particles: 'hearts' },
+  lavender: { particles: 'hearts' },
+  petals:   { particles: 'petals', premium: true },
+  letter:   { particles: 'hearts', premium: true },
+  starry:   { particles: 'stars',  premium: true },
+};
 let currentTheme = 'default';
 function applyTheme(t) {
-  if (!THEMES.includes(t)) t = 'default';
+  if (!THEMES[t]) t = 'default';
   currentTheme = t;
   document.body.dataset.theme = t;
+  spawnParticles(THEMES[t].particles);
 }
+
+// ---------- Payments feature flag (off unless the server says otherwise) ----------
+let paymentsEnabled = false;
 
 // ---------- Mode switch ----------
 if (typeof window.__INVITE__ !== 'undefined') {
@@ -51,13 +86,20 @@ if (typeof window.__INVITE__ !== 'undefined') {
 } else {
   const hash = location.hash.slice(1);
   if (hash) {
-    try { renderViewer(decodeData(hash)); }
+    try {
+      const data = decodeData(hash);
+      // Legacy hash links are client-authored, so never grant premium from them
+      delete data.premium;
+      if (THEMES[data.th]?.premium) data.th = 'default';
+      renderViewer(data);
+    }
     catch (e) {
       console.warn('Bad invite hash:', e);
       document.getElementById('creator').hidden = false;
     }
   } else {
     document.getElementById('creator').hidden = false;
+    initPayments();
   }
 }
 
@@ -257,11 +299,24 @@ if (creatorForm) {
       });
       if (!res.ok) throw new Error('Server error ' + res.status);
       const { id } = await res.json();
-      const url = location.origin + '/a/' + id;
-      document.getElementById('link-result').textContent = url;
-      const linkOutput = document.getElementById('link-output');
-      linkOutput.hidden = false;
-      try { linkOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch {}
+
+      const items = [];
+      if (THEMES[currentTheme]?.premium) items.push('theme');
+      if (document.getElementById('stats-addon-check')?.checked) items.push('stats');
+      if (paymentsEnabled && items.length) {
+        submitBtn.textContent = 'Redirecting to checkout…';
+        const co = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, items }),
+        });
+        if (!co.ok) throw new Error('Checkout error ' + co.status);
+        const { url } = await co.json();
+        location.href = url;
+        return;
+      }
+
+      showLink(id);
     } catch {
       err.textContent = 'Something went wrong. Please try again.';
     } finally {
@@ -286,6 +341,40 @@ if (creatorForm) {
       btn.textContent = 'Press ⌘C to copy';
     }
   });
+}
+
+function showLink(id, note) {
+  document.getElementById('link-result').textContent = location.origin + '/a/' + id;
+  const noteEl = document.getElementById('payment-note');
+  if (noteEl) { noteEl.textContent = note || ''; noteEl.hidden = !note; }
+  const linkOutput = document.getElementById('link-output');
+  linkOutput.hidden = false;
+  try { linkOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch {}
+}
+
+// Reveals premium options only when the server flag is on, and handles
+// returning from Stripe Checkout (?paid=<id> or ?canceled=<id>).
+async function initPayments() {
+  const params = new URLSearchParams(location.search);
+  const paidId = params.get('paid');
+  const canceledId = params.get('canceled');
+  if (paidId && /^[\w-]{6,12}$/.test(paidId)) {
+    showLink(paidId, 'Payment received ✓ Your premium extras are unlocked on this link.');
+  } else if (canceledId && /^[\w-]{6,12}$/.test(canceledId)) {
+    showLink(canceledId, 'Checkout canceled. Your link still works, with the free theme and no stats card.');
+  }
+  if (paidId || canceledId) history.replaceState(null, '', location.pathname);
+
+  try {
+    const res = await fetch('/api/config');
+    if (!res.ok) return;
+    const cfg = await res.json();
+    paymentsEnabled = !!cfg.paymentsEnabled;
+  } catch {}
+  if (!paymentsEnabled) return;
+  document.querySelectorAll('.theme-swatch.premium').forEach(b => { b.hidden = false; });
+  const addon = document.getElementById('stats-addon');
+  if (addon) addon.hidden = false;
 }
 
 // =============================================================
@@ -319,6 +408,7 @@ function renderAskText(el, text) {
 function renderViewer(data) {
   applyTheme(data.th || 'default');
   document.getElementById('viewer').hidden = false;
+  if (currentTheme === 'letter') setupEnvelope();
 
   const photo = document.getElementById('g-photo');
   if (data.photoUrl) {
@@ -363,7 +453,63 @@ function renderViewer(data) {
     m.textContent = '“' + data.m + '”';
     m.hidden = false;
   }
-  setupAnswers(data.plat, data.plng, data.p);
+  setupAnswers(data.plat, data.plng, data.p, {
+    shownAt: performance.now(),
+    statsCard: !!data.premium?.stats,
+    name: data.n,
+  });
+}
+
+// ---------- Love-letter theme: envelope that opens on tap ----------
+function setupEnvelope() {
+  const card = document.getElementById('viewer');
+  const env = document.createElement('div');
+  env.className = 'envelope';
+  env.innerHTML = '<div class="env-back"></div><div class="env-flap"></div><div class="env-front"></div><div class="env-seal">💌</div><div class="env-hint">Tap to open</div>';
+  card.classList.add('sealed');
+  document.body.appendChild(env);
+  env.addEventListener('click', () => {
+    if (env.classList.contains('open')) return;
+    env.classList.add('open');
+    setTimeout(() => card.classList.remove('sealed'), 500);
+    setTimeout(() => env.remove(), 1400);
+  });
+}
+
+// ---------- Reaction stats card (premium add-on) ----------
+function formatDuration(ms) {
+  const s = ms / 1000;
+  if (s < 60) return s.toFixed(1) + 's';
+  const m = Math.floor(s / 60);
+  return `${m}m ${Math.round(s % 60)}s`;
+}
+function statsVerdict(noCount, ms) {
+  if (noCount === 0 && ms < 5000) return 'Instant yes. Zero hesitation. 💘';
+  if (noCount === 0)              return 'Took a moment to think, but never even tried to say no. 🥰';
+  if (noCount < 4)                return `Tried to escape ${noCount} ${noCount === 1 ? 'time' : 'times'}, then gave in. 😏`;
+  if (noCount < 10)               return `Chased the "No" button ${noCount} times and lost. 😂`;
+  return `${noCount} attempts to click "No". Legendary stubbornness. Still said yes. 🏆`;
+}
+function showStatsCard(noCount, ms, name) {
+  const card = document.getElementById('stats-card');
+  if (!card) return;
+  document.getElementById('stat-time').textContent = formatDuration(ms);
+  document.getElementById('stat-chases').textContent = String(noCount);
+  document.getElementById('stat-verdict').textContent = statsVerdict(noCount, ms);
+  card.hidden = false;
+
+  const shareBtn = document.getElementById('stats-share');
+  const text = `I said yes to a date in ${formatDuration(ms)}` +
+    (noCount > 0 ? ` after chasing the "No" button ${noCount} ${noCount === 1 ? 'time' : 'times'} 😂` : ' with zero hesitation 💘') +
+    ` Make your own at ${location.origin}`;
+  shareBtn.addEventListener('click', async () => {
+    try {
+      if (navigator.share) { await navigator.share({ text }); return; }
+      await navigator.clipboard.writeText(text);
+      shareBtn.textContent = 'Copied! ✓';
+      setTimeout(() => shareBtn.textContent = 'Share 📤', 1500);
+    } catch {}
+  });
 }
 
 function formatWhen(d, t) {
@@ -384,7 +530,7 @@ function formatWhen(d, t) {
 //  We track its position in a local (px, px) variable instead of
 //  re-reading the DOM each event — no transition / reflow races.
 // -------------------------------------------------------------
-function setupAnswers(plat, plng, placeName) {
+function setupAnswers(plat, plng, placeName, opts = {}) {
   const arena = document.getElementById('answer-buttons');
   const yes = document.getElementById('btn-yes');
   const no  = document.getElementById('btn-no');
@@ -468,6 +614,7 @@ function setupAnswers(plat, plng, placeName) {
   window.addEventListener('resize', placeNo);
 
   yes.addEventListener('click', () => {
+    const hesitationMs = opts.shownAt != null ? Math.round(performance.now() - opts.shownAt) : null;
     confettiBurst();
     arena.style.display = 'none';
     document.getElementById('confirmation').classList.add('show');
@@ -489,12 +636,14 @@ function setupAnswers(plat, plng, placeName) {
       }
     }
 
+    if (opts.statsCard && hesitationMs != null) showStatsCard(noCount, hesitationMs, opts.name);
+
     // fire-and-forget notification — don't block the UI
     if (window.__INVITE__?.id) {
       fetch('/api/yes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: window.__INVITE__.id, noCount }),
+        body: JSON.stringify({ id: window.__INVITE__.id, noCount, hesitationMs }),
       }).catch(() => {});
     }
   });
