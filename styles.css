@@ -400,3 +400,12 @@ button { font-family: inherit; font-size: 16px; font-weight: 600; padding: 14px 
 .home[data-theme="starry"] :is(.hero, .topbar, .topnav a, .logo, .how > h2, .faq > h2, .footer, .footer a, .preview-caption) { color: #f4efff; }
 .home[data-theme="starry"] .hero { --muted: #d9d1ea; }
 .home[data-theme="starry"] .trust li { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.25); color: #f4efff; }
+
+/* iOS date/time inputs keep an intrinsic width unless appearance is reset */
+input[type="date"], input[type="time"] {
+  -webkit-appearance: none; appearance: none;
+  min-width: 0; max-width: 100%; display: block; min-height: 46px;
+  -webkit-min-logical-width: 0;
+}
+.grid-2 > div, .form-card form > div { min-width: 0; }
+input, textarea { max-width: 100%; }

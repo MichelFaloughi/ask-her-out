@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
   const invite = await kv.get(id);
 
   if (!invite) {
-    res.status(404).send(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Invite not found</title><link rel="stylesheet" href="/styles.css?v=5"></head><body><div class="card viewer"><div class="check">💔</div><h2>This invite isn't here</h2><p class="muted">It may have expired or the link is incomplete.</p><a class="btn-make-own" href="/">Make your own invite 💌</a></div></body></html>`);
+    res.status(404).send(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Invite not found</title><link rel="stylesheet" href="/styles.css?v=6"></head><body><div class="card viewer"><div class="check">💔</div><h2>This invite isn't here</h2><p class="muted">It may have expired or the link is incomplete.</p><a class="btn-make-own" href="/">Make your own invite 💌</a></div></body></html>`);
     return;
   }
 
@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
-  <link rel="stylesheet" href="/styles.css?v=5">
+  <link rel="stylesheet" href="/styles.css?v=6">
 </head>
 <body class="viewer-page">
 <div id="viewer" class="card viewer" hidden>
