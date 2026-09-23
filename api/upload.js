@@ -17,6 +17,12 @@ module.exports = async (req, res) => {
   }
 
   const id = nanoid(8);
+  // Cap field lengths so a stored invite stays small and the page stays sane
+  const LIMITS = { n: 60, a: 80, m: 300, y: 60, p: 200, d: 10, t: 5, email: 254, th: 20 };
+  for (const [k, max] of Object.entries(LIMITS)) {
+    if (typeof invite[k] === 'string' && invite[k].length > max) invite[k] = invite[k].slice(0, max);
+  }
+
   const stored = { ...invite };
   // Entitlements and results are only ever written server-side
   delete stored.premium;

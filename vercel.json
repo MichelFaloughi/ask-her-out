@@ -1,4 +1,5 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     { "source": "/a/:id", "destination": "/api/a/:id" }
   ]

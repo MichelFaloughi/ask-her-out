@@ -1,5 +1,5 @@
 const { kv } = require('@vercel/kv');
-const { PRICES, PREMIUM_THEMES, paymentsEnabled } = require('../lib/premium');
+const { PRICES, PREMIUM_THEMES, paymentsEnabled, normalizeItems } = require('../lib/premium');
 
 // Creates a one-time Stripe Checkout Session for an existing invite.
 // Uses Stripe's REST API directly (form-encoded), so no SDK dependency.
@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
   if (!id || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Missing id or items' });
   }
-  const wanted = [...new Set(items)].filter(k => PRICES[k]);
+  const wanted = normalizeItems(items);
   if (wanted.length === 0) return res.status(400).json({ error: 'No purchasable items' });
 
   const invite = await kv.get(id);

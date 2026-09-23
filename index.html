@@ -4,170 +4,260 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Wanna go on a date?</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <meta name="description" content="Make a personal, animated 'wanna go on a date?' page in 30 seconds. Free, no account. Send her the link and she taps Yes.">
+  <meta property="og:title" content="Ask her out with a page she'll never forget 💌">
+  <meta property="og:description" content="Build a personal invite in 30 seconds. Free, no account. Send the link, she taps Yes.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
-<body>
+<body class="home">
 
-<!-- ============ CREATOR ============ -->
-<div id="creator" class="card" hidden>
-  <h1>Make your invite ✨</h1>
-  <p style="margin-top:0; color:#7a6471;">You miss 💯% of the shots you don't take.</p>
+<!-- ============ CREATOR / LANDING ============ -->
+<div id="creator" class="site" hidden>
 
-  <form id="creator-form" novalidate>
-    <div>
-      <label class="field" for="name">Her name <span class="req">*</span></label>
-      <input type="text" id="name" required placeholder="e.g. Ana" autocomplete="off">
-    </div>
+  <header class="topbar">
+    <a class="logo" href="/">💌 <span>Ask Her Out</span></a>
+    <nav class="topnav">
+      <a href="#how">How it works</a>
+      <a href="#extras-anchor" id="nav-extras" hidden>Extras</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </header>
 
-    <div>
-      <label class="field" for="creator-email">Notify me when she says yes (optional)</label>
-      <input type="text" id="creator-email" placeholder="your@email.com" autocomplete="email">
-    </div>
+  <section class="hero">
+    <h1 class="display">Ask her out with a page <em>she'll never forget.</em></h1>
+    <p class="lede">Her name, your photo, the plan, a sweet note. A personal invite in thirty seconds, with a Yes button that wiggles and a No button that runs away.</p>
+    <ul class="trust">
+      <li>Free, no account</li>
+      <li>Private link, only she sees it</li>
+      <li>Ready in 30 seconds</li>
+      <li id="trust-stripe" hidden>Extras secured by Stripe</li>
+    </ul>
+  </section>
 
-    <div>
-      <label class="field">Her photo</label>
-      <label class="file-drop" id="drop-zone">
-        <input type="file" id="image" accept="image/*">
-        <div id="drop-text">Click or drag an image here</div>
-        <img id="preview" class="preview" alt="">
-      </label>
-    </div>
-
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-      <div>
-        <label class="field" for="date">Date</label>
-        <input type="date" id="date">
-      </div>
-      <div>
-        <label class="field" for="time">Time</label>
-        <input type="time" id="time">
-      </div>
-    </div>
-
-    <div>
-      <label class="field" for="place">Place</label>
-      <input type="text" id="place" placeholder="e.g. Café Lou, 7th &amp; Main">
-    </div>
-
-    <div>
-      <label class="field" for="message">Sweet note</label>
-      <textarea id="message" placeholder="Anything you'd like to say..."></textarea>
-    </div>
-
-    <details class="advanced">
-      <summary>Advanced settings ✨</summary>
-      <div class="advanced-body">
+  <section class="builder">
+    <div class="card form-card">
+      <form id="creator-form" novalidate>
+        <div class="section-title">The basics</div>
         <div>
-          <label class="field" for="ask-phrase">
-            Ask phrase
-            <span class="counter"><span id="ask-count">0</span>/80</span>
+          <label class="field" for="name">Her name <span class="req">*</span></label>
+          <input type="text" id="name" required placeholder="e.g. Ana" autocomplete="off" maxlength="60">
+        </div>
+
+        <div>
+          <label class="field">A photo <span class="optional">optional, but it makes it</span></label>
+          <label class="file-drop" id="drop-zone">
+            <input type="file" id="image" accept="image/*">
+            <img id="preview" class="preview" alt="">
+            <div id="drop-text">Click or drag an image here</div>
           </label>
-          <input type="text" id="ask-phrase" maxlength="80"
-                 placeholder="wanna go on a date?" autocomplete="off">
-          <div class="hint" style="margin-top:4px;">Shown as: "{her name}, {ask phrase}"</div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="field" for="date">Date</label>
+            <input type="date" id="date">
+          </div>
+          <div>
+            <label class="field" for="time">Time</label>
+            <input type="time" id="time">
+          </div>
+        </div>
+
+        <div>
+          <label class="field" for="place">Place</label>
+          <input type="text" id="place" placeholder="e.g. Café Lou, 7th &amp; Main" maxlength="200">
+          <div class="hint">Pick a suggestion and she'll get a map after she says yes.</div>
+        </div>
+
+        <div>
+          <label class="field" for="message">Sweet note <span class="counter"><span id="msg-count">0</span>/300</span></label>
+          <textarea id="message" placeholder="Anything you'd like to say..." maxlength="300"></textarea>
+        </div>
+
+        <div>
+          <label class="field" for="creator-email">Email me when she says yes <span class="optional">optional</span></label>
+          <input type="text" id="creator-email" placeholder="you@email.com" autocomplete="email">
+          <div class="hint">One email, only if she says yes. Never anything else.</div>
+        </div>
+
+        <div class="section-title">Make it yours</div>
+        <div>
+          <label class="field" for="ask-phrase">Ask phrase <span class="counter"><span id="ask-count">0</span>/80</span></label>
+          <input type="text" id="ask-phrase" maxlength="80" placeholder="wanna go on a date?" autocomplete="off">
+          <div class="hint">Shown as "{her name}, {ask phrase}"</div>
         </div>
 
         <div>
           <label class="field">Theme</label>
           <div class="theme-picker" id="theme-picker">
-            <button type="button" class="theme-swatch active" data-theme="default">
-              <span class="swatch-preview t-default"></span>
-              <span>Sweetheart</span>
-            </button>
-            <button type="button" class="theme-swatch" data-theme="ocean">
-              <span class="swatch-preview t-ocean"></span>
-              <span>Ocean</span>
-            </button>
-            <button type="button" class="theme-swatch" data-theme="sunset">
-              <span class="swatch-preview t-sunset"></span>
-              <span>Sunset</span>
-            </button>
-            <button type="button" class="theme-swatch" data-theme="mint">
-              <span class="swatch-preview t-mint"></span>
-              <span>Mint</span>
-            </button>
-            <button type="button" class="theme-swatch" data-theme="lavender">
-              <span class="swatch-preview t-lavender"></span>
-              <span>Lavender</span>
-            </button>
-            <button type="button" class="theme-swatch premium" data-theme="petals" hidden>
-              <span class="swatch-preview t-petals"></span>
-              <span>Petals</span>
-              <span class="price-badge">✨ $2</span>
-            </button>
-            <button type="button" class="theme-swatch premium" data-theme="letter" hidden>
-              <span class="swatch-preview t-letter"></span>
-              <span>Love letter</span>
-              <span class="price-badge">✨ $2</span>
-            </button>
-            <button type="button" class="theme-swatch premium" data-theme="starry" hidden>
-              <span class="swatch-preview t-starry"></span>
-              <span>Starry night</span>
-              <span class="price-badge">✨ $2</span>
-            </button>
+            <button type="button" class="theme-swatch active" data-theme="default"><span class="swatch-preview t-default"></span><span>Sweetheart</span></button>
+            <button type="button" class="theme-swatch" data-theme="ocean"><span class="swatch-preview t-ocean"></span><span>Ocean</span></button>
+            <button type="button" class="theme-swatch" data-theme="sunset"><span class="swatch-preview t-sunset"></span><span>Sunset</span></button>
+            <button type="button" class="theme-swatch" data-theme="mint"><span class="swatch-preview t-mint"></span><span>Mint</span></button>
+            <button type="button" class="theme-swatch" data-theme="lavender"><span class="swatch-preview t-lavender"></span><span>Lavender</span></button>
+            <button type="button" class="theme-swatch premium" data-theme="petals" hidden><span class="swatch-preview t-petals"></span><span>Petals</span><span class="price-badge">✨ animated</span></button>
+            <button type="button" class="theme-swatch premium" data-theme="letter" hidden><span class="swatch-preview t-letter"></span><span>Love letter</span><span class="price-badge">✨ animated</span></button>
+            <button type="button" class="theme-swatch premium" data-theme="starry" hidden><span class="swatch-preview t-starry"></span><span>Starry night</span><span class="price-badge">✨ animated</span></button>
           </div>
+          <div class="hint" id="theme-hint">Watch the preview change as you pick.</div>
         </div>
 
-        <label class="addon" id="stats-addon" hidden>
-          <input type="checkbox" id="stats-addon-check">
-          <span>
-            <strong>Reaction stats card</strong> <span class="price-badge">✨ $3</span>
-            <span class="hint" style="margin-top:2px;">After she says yes, she sees how long she hesitated and how many times she chased the "No" button, with a share button.</span>
-          </span>
-        </label>
+        <div>
+          <label class="field" for="yes-title">After she says yes, show <span class="counter"><span id="yes-count">0</span>/60</span></label>
+          <input type="text" id="yes-title" maxlength="60" placeholder="Yay! It's a date!" autocomplete="off">
+        </div>
+
+        <div id="extras-anchor"></div>
+        <section class="extras" id="extras" hidden>
+          <div class="extras-head">
+            <div class="section-title">Premium extras</div>
+            <span class="lock">🔒 Secure checkout by Stripe</span>
+          </div>
+          <label class="extra">
+            <input type="checkbox" data-item="theme">
+            <span class="extra-body">
+              <span class="extra-title">Animated theme <span class="price" data-price="theme">$2</span></span>
+              <span class="extra-desc">Falling petals, a love letter that opens on tap, or a starry night.</span>
+            </span>
+          </label>
+          <label class="extra">
+            <input type="checkbox" data-item="stats">
+            <span class="extra-body">
+              <span class="extra-title">Reaction stats card <span class="price" data-price="stats">$3</span></span>
+              <span class="extra-desc">How long she hesitated and how many times she chased the No button, as a card she can share.</span>
+            </span>
+          </label>
+          <label class="extra best">
+            <input type="checkbox" data-item="pass">
+            <span class="extra-body">
+              <span class="extra-title">Premium Pass <span class="price" data-price="pass">$4</span> <span class="badge">Best value</span></span>
+              <span class="extra-desc">Everything above, plus a live countdown to your date and no "ask-her-out" branding on her page.</span>
+            </span>
+          </label>
+          <div class="extras-total">
+            <span>One-time, for this invite</span>
+            <strong id="extras-total">$0</strong>
+          </div>
+        </section>
+
+        <button type="submit" class="btn-primary btn-big" id="submit-btn">Create my invite 💌</button>
+        <div id="creator-error" class="error" role="alert"></div>
+        <div class="fineprint">No account. Her page stays live for a year. Photos are private to the link.</div>
+      </form>
+
+      <div id="link-output" class="link-output" hidden>
+        <div class="section-title">Your invite is ready</div>
+        <div class="link-result" id="link-result"></div>
+        <div class="share-row">
+          <button type="button" class="btn-primary" id="copy-btn">Copy link</button>
+          <a class="btn-secondary" id="open-link" href="#" target="_blank" rel="noopener">Preview</a>
+          <a class="btn-secondary" id="share-sms" href="#">iMessage</a>
+          <a class="btn-secondary" id="share-wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+        <div class="hint">The link shows a preview card in iMessage and WhatsApp. She taps it, sees your page, and answers.</div>
+        <div class="hint" id="notify-note" hidden></div>
+        <div class="hint payment-note" id="payment-note" hidden></div>
       </div>
-    </details>
-
-    <button type="submit" class="btn-primary">Generate link 💌</button>
-    <div id="creator-error" class="error"></div>
-  </form>
-
-  <div id="link-output" class="link-output" hidden>
-    <div style="font-weight:700;">Send her this link:</div>
-    <div class="link-result" id="link-result"></div>
-    <button type="button" class="copy-btn" id="copy-btn">Copy link</button>
-    <div class="hint">
-      Send this link — it'll show a preview card in iMessage and other apps.
     </div>
-    <div class="hint" id="payment-note" hidden></div>
-  </div>
+
+    <aside class="preview-col">
+      <div class="phone" id="phone" data-theme="default">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="card pv-card">
+            <div class="photo-wrap pv-photo-wrap" id="pv-photo-wrap" hidden><img id="pv-photo" class="girl-photo" alt=""></div>
+            <div class="ask" id="pv-ask"></div>
+            <div class="details" id="pv-details" hidden>
+              <div class="detail" id="pv-when-row" hidden><span class="detail-icon">📅</span><span class="detail-text"><span class="detail-label">When</span><span id="pv-when"></span></span></div>
+              <div class="detail" id="pv-where-row" hidden><span class="detail-icon">📍</span><span class="detail-text"><span class="detail-label">Where</span><span id="pv-where"></span></span></div>
+            </div>
+            <p class="note" id="pv-message" hidden></p>
+            <div class="answer-buttons pv-buttons">
+              <button type="button" class="btn-yes">Yes! 💖</button>
+              <button type="button" class="btn-no pv-no">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-caption">Live preview of her page</div>
+    </aside>
+  </section>
+
+  <section class="how" id="how">
+    <h2 class="display">How it works</h2>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><h3>Fill in the details</h3><p>Her name, a photo, when and where. Add a note if you have the words.</p></div>
+      <div class="step"><span class="step-num">2</span><h3>Send her the link</h3><p>It shows a preview card in iMessage and WhatsApp. No app, no sign-up for her either.</p></div>
+      <div class="step"><span class="step-num">3</span><h3>She taps Yes</h3><p>Confetti, the plan, a map to the place. And you get an email the moment she does.</p></div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <h2 class="display">Questions</h2>
+    <details><summary>Is it really free?</summary><p>Yes. Everything you need to ask her out is free, with no account and no limits. Animated themes and the stats card are optional paid extras.</p></details>
+    <details><summary>What does she see?</summary><p>A page with your photo, your question, the plan and your note, plus a Yes button and a No button that runs away from her cursor. Try the preview on the right.</p></details>
+    <details><summary>Is my photo private?</summary><p>Only people with the link can see it. Links are unguessable, never listed anywhere, and each invite is deleted after a year.</p></details>
+    <details><summary>Will she know I used this?</summary><p>There's a small "Sent via ask-her-out.com" line at the bottom of her page. The Premium Pass removes it.</p></details>
+    <details><summary>Can I edit an invite after creating it?</summary><p>Not yet. Creating a new one takes thirty seconds, so make a fresh one and send the new link.</p></details>
+  </section>
+
+  <footer class="footer">
+    <div>💌 Ask Her Out</div>
+    <nav><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="mailto:hello@ask-her-out.com">Contact</a></nav>
+    <div class="muted">You miss 100% of the shots you don't take.</div>
+  </footer>
 </div>
 
-<!-- ============ VIEWER ============ -->
-<div id="viewer" class="card" hidden>
-  <img id="g-photo" class="girl-photo" alt="">
+<!-- ============ VIEWER (legacy hash links) ============ -->
+<div id="viewer" class="card viewer" hidden>
+  <div class="photo-wrap" id="g-photo-wrap"><img id="g-photo" class="girl-photo" alt=""></div>
   <div class="ask" id="g-ask"></div>
-  <div class="details">
-    <div class="row"><span class="label">When</span><span id="g-when"></span></div>
-    <div class="row"><span class="label">Where</span><span id="g-where"></span></div>
+  <div class="details" id="g-details">
+    <div class="detail" id="g-when-row"><span class="detail-icon">📅</span><span class="detail-text"><span class="detail-label">When</span><span id="g-when"></span></span></div>
+    <div class="detail" id="g-where-row"><span class="detail-icon">📍</span><span class="detail-text"><span class="detail-label">Where</span><span id="g-where"></span></span></div>
   </div>
   <p class="note" id="g-message" hidden></p>
-
   <div class="answer-buttons" id="answer-buttons">
     <button class="btn-yes" id="btn-yes">Yes! 💖</button>
-    <button class="btn-no"  id="btn-no">No</button>
+    <button class="btn-no" id="btn-no">No</button>
   </div>
-
   <div class="confirmation" id="confirmation">
     <div class="check">💖</div>
-    <h2>Yay! It's a date!</h2>
+    <h2 id="conf-title">Yay! It's a date!</h2>
     <p id="conf-text"></p>
+    <div class="countdown" id="countdown" hidden>
+      <div class="countdown-label">Counting down</div>
+      <div class="countdown-grid">
+        <div><b id="cd-d">0</b><span>days</span></div>
+        <div><b id="cd-h">0</b><span>hours</span></div>
+        <div><b id="cd-m">0</b><span>min</span></div>
+        <div><b id="cd-s">0</b><span>sec</span></div>
+      </div>
+    </div>
+    <div class="conf-actions">
+      <button type="button" class="btn-secondary" id="btn-calendar" hidden>Add to calendar</button>
+    </div>
     <div class="map-container" id="map-container" hidden></div>
     <div class="stats-card" id="stats-card" hidden>
-      <div class="stats-title">Reaction stats 📊</div>
+      <div class="stats-title">Reaction stats</div>
       <div class="stats-grid">
         <div><div class="stat-num" id="stat-time"></div><div class="stat-label">to say yes</div></div>
         <div><div class="stat-num" id="stat-chases"></div><div class="stat-label">"No" escapes</div></div>
       </div>
       <div class="stats-verdict" id="stat-verdict"></div>
-      <button type="button" class="copy-btn" id="stats-share">Share 📤</button>
+      <button type="button" class="stats-share" id="stats-share">Share</button>
     </div>
-    <a class="btn-make-own" href="/">Make your own invite 💌</a>
+    <a class="btn-make-own brand" href="/">Make your own invite 💌</a>
   </div>
-  <a class="make-own" href="/">Make your own 💌</a>
+  <a class="make-own brand" href="/">Sent with 💌 via ask-her-out.com</a>
 </div>
 
 <script>window.__MAPS_KEY__ = 'AIzaSyCMpyHYUFTiu2US4WupRP0Z2ZKpOGPDFZE';</script>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
