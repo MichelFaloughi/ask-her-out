@@ -3,7 +3,7 @@
 Running list of follow-ups. Tick items off or delete them when done.
 
 ## Before shipping the redesign
-- [ ] Deploy production: `vercel deploy --prod` (must be run by Michel, the agent can't)
+- [x] Deploy production: `vercel deploy --prod` (must be run by Michel, the agent can't)
 - [ ] Check the preview on a real phone: https://ask-her-out-preview.vercel.app
 - [ ] Create the `hello@ask-her-out.com` inbox (footer, Privacy and Terms link to it), or change the address in index.html, privacy.html, terms.html
 
